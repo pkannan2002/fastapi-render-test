@@ -10,6 +10,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 class TaskRequest(BaseModel):
     input: str
 
+
 @app.post("/parse-task")
 async def parse_task(request: TaskRequest):
     response = client.chat.completions.create(
@@ -18,6 +19,11 @@ async def parse_task(request: TaskRequest):
     )
     task_data = response.choices[0].message.content
     return {"parsed_task": task_data}
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, FastAPI on Render!"}
+
 
 # Ping the app every 10 minutes to prevent spin-down
 @aiocron.crontab("*/10 * * * *")  # Run every 10 minutes
