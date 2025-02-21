@@ -1,11 +1,8 @@
 from fastapi import FastAPI
 from groq import Groq
 from pydantic import BaseModel
-from dotenv import load_dotenv
 import os
-
-# Load environment variables
-load_dotenv()
+import aiocron
 
 app = FastAPI()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -21,6 +18,12 @@ async def parse_task(request: TaskRequest):
     )
     task_data = response.choices[0].message.content
     return {"parsed_task": task_data}
+
+# Ping the app every 10 minutes to prevent spin-down
+@aiocron.crontab("*/10 * * * *")  # Run every 10 minutes
+async def ping_self():
+    import requests
+    requests.get("https://fastapi-ai-test.onrender.com/")
 
 if __name__ == "__main__":
     import uvicorn
